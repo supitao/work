@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>workshop</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            position: relative;
+            background-color: black;
+        }
+
+        canvas {
+            position: absolute;
+            display: block;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            cursor: crosshair;
+            top: 0px;
+            left: 0px;
+            transform: scale(0.7);
+        }
+    
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            object-fit: cover;
+        }
+        
+        .text-container {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            font-family: 'Chalkboard';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 30px;
+            line-height: 50px;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #000000;
+        }
+
+        .button-container {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .button-container button {
+            padding: 10px;
+            font-size: 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .button-container button.clear {
+            background-color: white;
+            color: black;
+        }
+
+        .button-container button.red {
+            background-color: red;
+            color: white;
+        }
+
+        .button-container button.green {
+            background-color: green;
+            color: white;
+        }
+
+        .button-container button.blue {
+            background-color: blue;
+            color: white;
+        }
+
+        .button-container button.black {
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="drawingCanvas"></canvas>
+    <img class="background-image" src="img/wallpaper_2.png" alt="Background Image">
+
+    <div class="button-container">
+        <button class="clear" onclick="clearCanvas()">Clear</button>
+        <button class="red" onclick="changeColor('red')">Red</button>
+        <button class="green" onclick="changeColor('green')">Green</button>
+        <button class="blue" onclick="changeColor('blue')">Blue</button>
+        <button class="black" onclick="changeColor('black')">Black</button>
+    </div>
+
+    <script>
+        var canvas = document.getElementById("drawingCanvas");
+        var context = canvas.getContext("2d");
+        var isDrawing = false;
+        var isErasing = false;
+        var lastX = 0;
+        var lastY = 0;
+        var currentColor = "black";
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        canvas.addEventListener("mousedown", startDrawing);
+        canvas.addEventListener("mousemove", draw);
+        canvas.addEventListener("mouseup", stopDrawing);
+        canvas.addEventListener("touchstart", startDrawing);
+        canvas.addEventListener("touchmove", draw);
+        canvas.addEventListener("touchend", stopDrawing);
+
+        function startDrawing(event) {
+            if (event.shiftKey) {
+                // 如果按下了 Shift 鍵，則切換到橡皮擦模式
+                isErasing = true;
+                context.globalCompositeOperation = "destination-out";
+            } else {
+                isDrawing = true;
+                var { offsetX, offsetY } = event;
+                lastX = offsetX;
+                lastY = offsetY;
+                draw(event);
+            }
+        }
+
+        function draw(event) {
+            if (!isDrawing && !isErasing) return;
+
+            var x, y;
+
+            if (event.touches) {
+                x = event.touches[0].clientX - canvas.offsetLeft;
+                y = event.touches[0].clientY - canvas.offsetTop;
+            } else {
+                x = event.clientX - canvas.offsetLeft;
+                y = event.clientY - canvas.offsetTop;
+            }
+
+            if (isErasing) {
+                context.clearRect(x - 10, y - 10, 20, 20);
+            } else {
+                context.beginPath();
+                context.moveTo(lastX, lastY);
+                context.lineTo(x, y);
+                context.strokeStyle = currentColor;
+                context.stroke();
+                lastX = x;
+                lastY = y;
+            }
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            isErasing = false;
+            context.globalCompositeOperation = "source-over";
+        }
+
+        function clearCanvas() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        function changeColor(color) {
+            currentColor = color;
+        }
+    </script>
+
+    <a href="home.html">
+        <div class="text-container">
+            Back
+        </div>
+    </a>
+</body>
+</html>
